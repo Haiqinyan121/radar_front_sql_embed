@@ -61,20 +61,15 @@ class MySQLHelper:
 
 
 # 初始化连接
-db = MySQLHelper('localhost', 'root', '123456', 'user_data')
+db = MySQLHelper('localhost', 'root', 'root', 'hmbld')
 
-# 插入数据
-#user_id = db.insert('user_info', {'name': 'Alice', 'age': 30})
 
-# 更新数据
-#db.update('user_info', {'age': 31}, where="name='Alice'")
-
-# 删除数据
-#db.delete('user_info', where="username='Alice'")
+# 示例插入数据
+#user_id = db.insert('heart_rate', {'record_time': 1234567890, 'heart_rate': 75.5})
 
 # 查询数据
-users = db.query("SELECT * FROM user_info WHERE username = '1234'")
-print(users)
+data = db.query("SELECT * FROM heart_rate LIMIT 10")
+print(data)
 
 # 关闭连接
 db.close()

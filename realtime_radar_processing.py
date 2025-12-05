@@ -78,6 +78,15 @@ except ImportError:
         'range_resolution': 0.027,
     }
 
+# 导入数据库模块
+try:
+    from db import MySQLHelper
+    print("成功导入数据库模块")
+    DB_ENABLED = True
+except ImportError:
+    print("警告：无法导入数据库模块，数据库功能将被禁用")
+    DB_ENABLED = False
+
 # 处理参数设置
 FRAME_RATE = get_param('frame_rate')           # 雷达帧率
 BUFFER_SIZE = 65539                            # UDP包缓冲区大小
@@ -158,6 +167,17 @@ class RealtimeRadarProcessor:
         self.start_time = time.time()       # 程序启动时间
         self.last_status_time = time.time() # 上次状态报告时间
         self.frames_since_last_process = 0  # 自上次处理后累积的帧数 - 添加为类属性
+
+        # 数据库连接
+        self.db = None
+        if DB_ENABLED:
+            try:
+                # 初始化数据库连接
+                self.db = MySQLHelper('localhost', 'root', 'root', 'hmbld')
+                print("成功连接到数据库")
+            except Exception as e:
+                print(f"数据库连接失败: {e}")
+                self.db = None
 
         # 结果存储
         self.phase_values = None            # 最近一次处理的相位值
@@ -453,6 +473,14 @@ class RealtimeRadarProcessor:
             self.socket.close()
             self.socket = None
 
+        # 关闭数据库连接
+        if self.db is not None:
+            try:
+                self.db.close()
+                print("数据库连接已关闭")
+            except Exception as e:
+                print(f"关闭数据库连接时出错: {e}")
+
         print("实时雷达数据处理器已停止")
 
     def _process_data(self):
@@ -670,6 +698,25 @@ class RealtimeRadarProcessor:
                 print(f">> 结果: 目标距离 {target_distance:.2f}米 (bin{target_bin}) | 用时: {(process_end_time - process_start_time)*1000:.0f}ms")
                 if self.presence_stable and self.heart_rate is not None:
                     print(f">> 心率预测: {self.heart_rate:.1f} BPM")
+                    
+                    # 保存结果到数据库
+                    if self.db is not None:
+                        try:
+                            # 准备要保存的数据
+                            radar_data = {
+                                'record_time': process_end_time,
+                                'heart_rate': self.heart_rate,
+                                'target_distance': target_distance,
+                                'target_bin': target_bin,
+                                'presence_detected': self.presence_stable,
+                                'processing_time_ms': (process_end_time - process_start_time)*1000
+                            }
+                              
+                            # 插入数据到数据库
+                            self.db.insert('heart_rate', radar_data)
+                            print("数据已保存到数据库")
+                        except Exception as e:
+                            print(f"保存数据到数据库时出错: {e}")
 
                 # 更新统计
                 self.processing_count += 1
