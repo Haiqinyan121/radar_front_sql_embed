@@ -35,8 +35,10 @@ class MySQLHelper:
         keys = ', '.join(data.keys())
         values = ', '.join(['%s'] * len(data))
         sql = f"INSERT INTO {table} ({keys}) VALUES ({values})"
-        self._execute(sql, tuple(data.values()))
-        return self.conn.lastrowid  # 返回新插入的主键ID
+        with self.conn.cursor() as cursor:
+            cursor.execute(sql, tuple(data.values()))
+            self.conn.commit()
+            return cursor.lastrowid  # 返回新插入的主键ID
 
     def update(self, table, data, where="1=1"):
         """更新数据"""

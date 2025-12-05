@@ -35,6 +35,7 @@ def test_data_transfer():
         test_data = {
             'record_time': process_end_time,
             'heart_rate': random.uniform(60, 100),  # 随机心率 (60-100 bpm)
+            'breathe_speed': random.uniform(1.0, 5.0),  # 随机呼吸速度 
             'target_distance': random.uniform(0.5, 5.0),  # 随机距离 (0.5-5.0米)
             'target_bin': random.randint(10, 100),  # 随机距离索引
             'presence_detected': True,  # 模拟检测到稳定存在
@@ -63,11 +64,11 @@ def test_data_transfer():
         else:
             print("   ❌ 数据验证失败，未查询到插入的记录")
         
-        # 5. 查询最近5条记录，确认数据库功能正常
-        print("5. 查询最近5条记录:")
-        recent_data = db.query("SELECT * FROM heart_rate ORDER BY id DESC LIMIT 5")
+        # 5. 查询最近10条记录，确认数据库功能正常
+        print("5. 查询最近10条记录:")
+        recent_data = db.query("SELECT * FROM heart_rate ORDER BY id DESC LIMIT 10")
         for i, record in enumerate(recent_data, 1):
-            print(f"   记录 {i}: ID={record['id']}, 心率={record['heart_rate']}, 时间戳={record['timestamp']}")
+            print(f"   记录 {i}: ID={record['id']}, 心率={record['heart_rate']}, 时间戳={record['record_time']}")
             
     except Exception as e:
         print(f"   ❌ 测试失败: {e}")
