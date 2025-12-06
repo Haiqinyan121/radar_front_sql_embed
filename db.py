@@ -65,6 +65,21 @@ class MySQLHelper:
 # 初始化连接
 db = MySQLHelper('localhost', 'root', 'root', 'hmbld')
 
+# 建表语句
+"""
+DROP TABLE IF EXISTS `heart_rate`;
+CREATE TABLE `heart_rate`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户id',
+  `record_time` float NOT NULL COMMENT '数据记录时间',
+  `heart_rate` float NOT NULL COMMENT '心率',
+  `breathe_speed` int(11) NULL DEFAULT NULL COMMENT '呼吸速率',
+  `target_distance` float NULL DEFAULT NULL COMMENT '目标距离',
+  `target_bin` int(11) NULL DEFAULT NULL COMMENT '目标bin',
+  `presence_detected` tinyint(1) NULL DEFAULT NULL COMMENT '存在检测结果',
+  `processing_time_ms` float NULL DEFAULT NULL COMMENT '处理时间（ms）',
+  PRIMARY KEY (`id`, `record_time`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+"""
 
 # 示例插入数据
 #user_id = db.insert('heart_rate', {'record_time': 1234567890, 'heart_rate': 75.5})
